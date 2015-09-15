@@ -1,12 +1,15 @@
 #include "ExpType.h"
 #include "ExpPublic.h"
 #include "EFIF.h"
+#include "ExpDispLine.h"
+#include "ExpDataCtrl.h"
 
 // 列車IDとその列車の取得元のリンクの運行日を保持する構造体
 struct train_id_with_drive_date_t {
 	ExpUInt32 trainid;
 	ExpDate drive_date;
 };
+typedef struct train_id_with_drive_date_t TrainIDWithDriveDateT;
 
 
 static ExpInt32 *get_share_sta_code_array(const ExpDLStationList listhd, const Ex_DataBase *exp_db, size_t *array_size) {
@@ -35,8 +38,8 @@ static ExpInt32 *get_share_sta_code_array(const ExpDLStationList listhd, const E
 // 配列ソート用関数（昇順）
 static int comp_ascending_order( const void *c1, const void *c2 )
 {
-  train_id_with_drive_date_t tmp1 = *(train_id_with_drive_date_t *)c1;
-  train_id_with_drive_date_t tmp2 = *(train_id_with_drive_date_t *)c2;
+  TrainIDWithDriveDateT tmp1 = *(TrainIDWithDriveDateT *)c1;
+  TrainIDWithDriveDateT tmp2 = *(TrainIDWithDriveDateT *)c2;
 
   if( tmp1.trainid < tmp2.trainid )  return -1;
   if( tmp1.trainid == tmp2.trainid ) return  0;
@@ -45,13 +48,13 @@ static int comp_ascending_order( const void *c1, const void *c2 )
 
 
 // 全探索経路からユニークな列車IDの配列を生成
-static train_id_with_drive_date_t* create_unique_trainid_array(const DSP	**dsp_table, int FoundCnt, size_t *array_size) {
+static TrainIDWithDriveDateT* create_unique_trainid_array(const DSP	**dsp_table, int FoundCnt, size_t *array_size) {
 
 	// int* unique_trainid_array;
-	train_id_with_drive_date_t *unique_trainid_array;
+	TrainIDWithDriveDateT *unique_trainid_array;
 	int unique_trainid_index;
 	// int* trainid_array;
-	train_id_with_drive_date_t *trainid_array;
+	TrainIDWithDriveDateT *trainid_array;
 	int  trainid_array_buffer;
 	int  trainid_array_size;
 	int  trainid_index = 0;
@@ -60,7 +63,7 @@ static train_id_with_drive_date_t* create_unique_trainid_array(const DSP	**dsp_t
 	// 必要に応じて拡張するので適当な要素数を確保
 	trainid_array_buffer = 20;
 	// trainid_array = (int*)malloc(sizeof(int)*trainid_array_buffer);
-	trainid_array = (train_id_with_drive_date_t*)malloc(sizeof(train_id_with_drive_date_t)*trainid_array_buffer);
+	trainid_array = (TrainIDWithDriveDateT*)malloc(sizeof(TrainIDWithDriveDateT)*trainid_array_buffer);
 	if (trainid_array == NULL) {
 		printf("create_ef_trains 内 malloc エラー");
 		abort();
@@ -89,7 +92,7 @@ static train_id_with_drive_date_t* create_unique_trainid_array(const DSP	**dsp_t
 	// 昇順に並べ替え
 	qsort(trainid_array, trainid_array_size, sizeof(ExpUInt32), comp_ascending_order_int);
 	// 列車IDが重複する要素は取り除く
-	unique_trainid_array = (train_id_with_drive_date_t*)malloc(sizeof(train_id_with_drive_date_t)*trainid_array_size);
+	unique_trainid_array = (TrainIDWithDriveDateT*)malloc(sizeof(TrainIDWithDriveDateT)*trainid_array_size);
 	unique_trainid_index = 0;
 	int current_elm;
 	for(trainid_index = 0; trainid_index<trainid_array_size; ++trainid_index) {
@@ -113,7 +116,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 	Dsp_table 	 = GetDspPtr( navi_handler );
 
 	size_t unique_trainid_array_size;
-	train_id_with_drive_date_t* unique_trainid_array = create_unique_trainid_array(dsp_table, FoundCnt, &unique_trainid_array_size);
+	TrainIDWithDriveDateT* unique_trainid_array = create_unique_trainid_array(dsp_table, FoundCnt, &unique_trainid_array_size);
 
 	for(int unique_trainid_index = 0; unique_trainid_index < unique_trainid_array_size; ++unique_trainid_index) {
 		EFIF_InputTrainDataHandler efif_train_data = NULL;
