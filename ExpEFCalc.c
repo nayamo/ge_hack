@@ -9,11 +9,11 @@ struct train_id_with_drive_date_t {
 };
 
 
-static ExpInt32 *share_sta_code_list get_share_sta_code_array(const ExpDLStationList listhd, const Ex_DataBase *exp_db, size_t *array_size) {
+static ExpInt32 *get_share_sta_code_array(const ExpDLStationList listhd, const Ex_DataBase *exp_db, size_t *array_size) {
 	int list_count = ExpDLStationList_GetCount(listhd);
 	ExpInt32 *share_sta_code_list;
 	*array_size = 0;
-	share_sta_code_list = (ExpInt16*)malloc(sizeof(ExpInt16)*list_count);
+	share_sta_code_list = (ExpInt32*)malloc(sizeof(ExpInt32)*list_count);
 	if (share_sta_code_list == NULL) {
 		printf("get_share_sta_code_array 内 malloc エラー");
 		abort();
@@ -45,7 +45,7 @@ static int comp_ascending_order( const void *c1, const void *c2 )
 
 
 // 全探索経路からユニークな列車IDの配列を生成
-static train_id_with_drive_date_t* unique_trainid_array create_unique_trainid_array(const DSP	**dsp_table, int FoundCnt, size_t *array_size) {
+static train_id_with_drive_date_t* create_unique_trainid_array(const DSP	**dsp_table, int FoundCnt, size_t *array_size) {
 
 	// int* unique_trainid_array;
 	train_id_with_drive_date_t *unique_trainid_array;
