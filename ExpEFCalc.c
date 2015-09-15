@@ -3,6 +3,7 @@
 #include "EFIF.h"
 #include "ExpDispLine.h"
 #include "ExpDataCtrl.h"
+#include "ExpCtrl.h"
 
 // 列車IDとその列車の取得元のリンクの運行日を保持する構造体
 struct train_id_with_drive_date_t {
@@ -48,8 +49,9 @@ static int comp_ascending_order( const void *c1, const void *c2 )
 
 
 // 全探索経路からユニークな列車IDの配列を生成
-static TrainIDWithDriveDateT* create_unique_trainid_array(const DSP	**dsp_table, int FoundCnt, size_t *array_size) {
-
+static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler navi_handler, size_t *array_size) {
+	ExpInt16				FoundCnt=0; // 探索数
+	DSP						**dsp_table;
 	// int* unique_trainid_array;
 	TrainIDWithDriveDateT *unique_trainid_array;
 	int unique_trainid_index;
@@ -58,6 +60,9 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const DSP	**dsp_table,
 	int  trainid_array_buffer;
 	int  trainid_array_size;
 	int  trainid_index = 0;
+
+	FoundCnt = GetFoundCount( navi_handler );
+	Dsp_table 	 = GetDspPtr( navi_handler );
 
 	*array_size = 0;
 	// 必要に応じて拡張するので適当な要素数を確保
@@ -90,13 +95,13 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const DSP	**dsp_table,
 	}
 	trainid_array_size = trainid_index;
 	// 昇順に並べ替え
-	qsort(trainid_array, trainid_array_size, sizeof(ExpUInt32), comp_ascending_order_int);
+	qsort(trainid_array, trainid_array_size, sizeof(ExpUInt32), comp_ascending_order);
 	// 列車IDが重複する要素は取り除く
 	unique_trainid_array = (TrainIDWithDriveDateT*)malloc(sizeof(TrainIDWithDriveDateT)*trainid_array_size);
 	unique_trainid_index = 0;
-	int current_elm;
+	TrainIDWithDriveDateT current_elm;
 	for(trainid_index = 0; trainid_index<trainid_array_size; ++trainid_index) {
-		if (trainid_index == 0 || current_elm.train_id != trainid_array[trainid_index].train_id) {
+		if (trainid_index == 0 || current_elm.trainid != trainid_array[trainid_index].trainid) {
 			current_elm = trainid_array[trainid_index];
 			unique_trainid_array[unique_trainid_index] = current_elm;
 			++unique_trainid_index;
@@ -109,14 +114,8 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const DSP	**dsp_table,
 
 // 現Eダイヤ探索の情報からEFの列車を作る
 static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area, const EFIF_DBHandler efif_db_handler, const Ex_NaviHandler navi_handler) {
-	ExpInt16				FoundCnt=0; // 探索数
-	DSP						**dsp_table;
-
-	FoundCnt = GetFoundCount( navi_handler );
-	Dsp_table 	 = GetDspPtr( navi_handler );
-
 	size_t unique_trainid_array_size;
-	TrainIDWithDriveDateT* unique_trainid_array = create_unique_trainid_array(dsp_table, FoundCnt, &unique_trainid_array_size);
+	TrainIDWithDriveDateT* unique_trainid_array = create_unique_trainid_array(navi_handler, &unique_trainid_array_size);
 
 	for(int unique_trainid_index = 0; unique_trainid_index < unique_trainid_array_size; ++unique_trainid_index) {
 		EFIF_InputTrainDataHandler efif_train_data = NULL;
