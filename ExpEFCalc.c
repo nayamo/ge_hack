@@ -25,7 +25,7 @@ static ExpInt32 *get_share_sta_code_array(const ExpDLStationList listhd, const E
 	for (int station_no = 1; station_no<=list_count; ++station_no) {
 		ExpStationCode sta_code;
 		ExpStation_SetEmptyCode(&sta_code);
-		if (!ExpDLStationList_GetStationCode(listhd, station_no, ExpStationCode &sta_code)) {
+		if (!ExpDLStationList_GetStationCode(listhd, station_no, &sta_code)) {
 			printf("ExpDLStationList_GetStationCode エラー");
 		}
 		ExpInt32 shared_code = ExpStation_CodeToSharedCode((ExpDataHandler)exp_db, &sta_code);
