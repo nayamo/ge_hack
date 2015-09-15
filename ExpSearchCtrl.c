@@ -1,5 +1,7 @@
 #include "ExpPrivate.h"
 #include "ExpPublic.h"
+#include "EFIF.h"
+#include "ExpEFCalc.h"
 
 /* ExpSize DebUseMemSize( ExpVoid ); */
 
@@ -4411,6 +4413,8 @@ ExpRouteResHandler ExpRoute_DiaSearch( 	ExpNaviHandler		handler,
 	DSP						**Dsp;
 	ExpInt16				FoundCnt=0;
 	Ex_DTSearchController	controller;
+	EFIF_DBHandler efif_db_handler;
+	EFIF_FareCalculationWorkingAreaHandler efif_fare_calc_working_area;
 
 	navi_handler = (Ex_NaviHandler)handler;
 	if  ( !handler || !( mode == 0 || mode == 1 ) || time < 0 )
@@ -4482,8 +4486,11 @@ ExpRouteResHandler ExpRoute_DiaSearch( 	ExpNaviHandler		handler,
 			{
 				status = DiaEditRoute( navi_handler );
 			
-				if  ( status == EXP_TRUE )
+				if  ( status == EXP_TRUE ) {
 					status = CalcuDiaFare( navi_handler );
+					efif_db_handler = EFIF_DBHandler_Create("./");
+					efif_fare_calc_working_area = Exp_EF_FareCalc(efif_db_handler, navi_handler);
+				}
 			}
 			else
 			{
