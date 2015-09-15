@@ -4488,7 +4488,7 @@ ExpRouteResHandler ExpRoute_DiaSearch( 	ExpNaviHandler		handler,
 			
 				if  ( status == EXP_TRUE ) {
 					status = CalcuDiaFare( navi_handler );
-					efif_db_handler = EFIF_DBHandler_Create("./");
+					efif_db_handler = EFIF_DBHandler_Create("/home/centos/git/e4/test/data");
 					efif_fare_calc_working_area = Exp_EF_FareCalc(efif_db_handler, navi_handler);
 				}
 			}
