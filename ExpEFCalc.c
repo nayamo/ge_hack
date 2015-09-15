@@ -61,6 +61,8 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 	int  trainid_array_size;
 	int  trainid_index = 0;
 
+	ExpDate navi_dep_date = ExpNavi_GetDepartureDate((ExpNaviHandler)navi_handler);
+
 	FoundCnt = GetFoundCount( navi_handler );
 	dsp_table 	 = GetDspPtr( navi_handler );
 
@@ -78,7 +80,7 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 		DSP* dsp = dsp_table[i];
 		for (int rln_index=0; rln_index < dsp->rln_cnt; ++rln_index) {
 			ONLNK rln = dsp->rln[rln_index];
-			ExpDate date = ExpTool_OffsetDate( navi_dep_date, rln.offsetdate);
+			ExpDate date = ExpTool_OffsetDate(navi_dep_date, rln.offsetdate);
 			// メモリが足りなくなったら拡張
 			if (trainid_array_buffer < trainid_index+1) {
 				trainid_array_buffer += 20;
@@ -132,7 +134,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		// 列車IDから現E表示線区パターンを生成
 		ExpDLinePatternList d_line_ptn = ExpDLine_GetTrainLinePattern(&navi_handler->dbLink, trainid);
 		int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
-		for(int d_line_no = 1; d_line_index<=d_line_count; ++d_line_index) {
+		for(int d_line_no = 1; d_line_no<=d_line_count; ++d_line_no) {
 			EFIF_DisplaySenkuHandler efif_d_display_senku_handler;
 			int status;
 			ExpDLStationList dl_primitive_station_list;
@@ -144,7 +146,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			int primary_dir; // その表示線区における方向性のデフォルトかな？
 			ExpUInt32 d_line_id;
 			int dir;
-			int fare_senku_count;
+			int ekispert_fare_senku_count;
 			// 表示線区IDと方向性を取得
 			if (!ExpDLinePatternList_GetLineID(d_line_ptn, d_line_no, &d_line_id, &dir)) {
 				printf("ExpDLinePatternList_GetLineID 実行時エラー");
@@ -162,8 +164,6 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			if (!status) {
 				printf("EFIF_DisplaySenku_Create 実行時エラー");
 			}
-			free(share_sta_code_list);
-			free(stop_sta_code_list);
 			if (ekispert_fare_senku_count != EFIF_DisplaySenku_Get_Train_Data_Entry_Count(efif_d_display_senku_handler)) {
 				printf(" EFIF_DisplaySenku が認識するの現E運賃線区の数が不正");
 			}
