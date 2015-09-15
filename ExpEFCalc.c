@@ -62,7 +62,7 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 	int  trainid_index = 0;
 
 	FoundCnt = GetFoundCount( navi_handler );
-	Dsp_table 	 = GetDspPtr( navi_handler );
+	dsp_table 	 = GetDspPtr( navi_handler );
 
 	*array_size = 0;
 	// 必要に応じて拡張するので適当な要素数を確保
@@ -130,7 +130,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		EFIF_DisplaySenkuPatternHandler efif_disp_senku_ptn = EFIF_DisplaySenkuPattern_Create();
 		ExpInt16 edit_type = 0;
 		// 列車IDから現E表示線区パターンを生成
-		ExpDLinePatternList d_line_ptn = ExpDLine_GetTrainLinePattern(&navi_handler.dbLink, trainid);
+		ExpDLinePatternList d_line_ptn = ExpDLine_GetTrainLinePattern(&navi_handler->dbLink, trainid);
 		int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
 		for(int d_line_no = 1; d_line_index<=d_line_count; ++d_line_index) {
 			EFIF_DisplaySenkuHandler efif_d_display_senku_handler;
@@ -150,15 +150,15 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 				printf("ExpDLinePatternList_GetLineID 実行時エラー");
 			}
 			// 現E表示線区から駅リストを取得、このリストは現E運賃線区の駅並びと一致する（関数コメントより）
-			dl_primitive_station_list = ExpDLine_GetDLPrimitiveStationList((ExpDLineDataHandler)navi_handler.dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
-			primitive_sta_code_list = get_share_sta_code_array(dl_primitive_station_list, navi_handler.dbLink, &primitive_sta_code_list_size);
+			dl_primitive_station_list = ExpDLine_GetDLPrimitiveStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
+			primitive_sta_code_list = get_share_sta_code_array(dl_primitive_station_list, navi_handler->dbLink, &primitive_sta_code_list_size);
 			ExpDLStationList_Delete(dl_primitive_station_list);
 			ekispert_fare_senku_count = primitive_sta_code_list-1;
-			dl_stop_station_list = ExpDLine_GetDLStopStationList((ExpDLineDataHandler)navi_handler.dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
-			stop_sta_code_list = get_share_sta_code_array(dl_primitive_station_list, navi_handler.dbLink, &share_sta_code_list_size);
+			dl_stop_station_list = ExpDLine_GetDLStopStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
+			stop_sta_code_list = get_share_sta_code_array(dl_stop_station_list, navi_handler->dbLink, &stop_sta_code_list_size);
 			ExpDLStationList_Delete(dl_stop_station_list);
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
-			efif_d_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, dl_stop_station_list, stop_sta_code_list_size, &status);
+			efif_d_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
 			if (!status) {
 				printf("EFIF_DisplaySenku_Create 実行時エラー");
 			}
@@ -198,7 +198,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 
 
 EFIF_FareCalculationWorkingAreaHandler Exp_EF_FareCalc(const EFIF_DBHandler efif_db_handler, const Ex_NaviHandler navi_handler) {
-	EFIF_FareCalculationWorkingAreaHandler working_area = EFIF_FareCalculationWorkingArea_Create(db_handler);
+	EFIF_FareCalculationWorkingAreaHandler working_area = EFIF_FareCalculationWorkingArea_Create(efif_db_handler);
 	// 探索経路情報からEFの列車を生成する
 	create_ef_trains(working_area, efif_db_handler, navi_handler);
 	return working_area;
