@@ -132,7 +132,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		EFIF_DisplaySenkuPatternHandler efif_disp_senku_ptn = EFIF_DisplaySenkuPattern_Create();
 		ExpInt16 edit_type = 0;
 		// 列車IDから現E表示線区パターンを生成
-		ExpDLinePatternList d_line_ptn = ExpDLine_GetTrainLinePattern(&navi_handler->dbLink, trainid);
+		ExpDLinePatternList d_line_ptn = ExpDLine_GetTrainLinePattern(navi_handler->dbLink, trainid);
 		int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
 		for(int d_line_no = 1; d_line_no<=d_line_count; ++d_line_no) {
 			EFIF_DisplaySenkuHandler efif_d_display_senku_handler;
