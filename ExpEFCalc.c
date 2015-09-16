@@ -123,7 +123,7 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 	}
 	trainid_array_size = trainid_index;
 	// 昇順に並べ替え
-	qsort(trainid_array, trainid_array_size, sizeof(ExpUInt32), comp_ascending_order);
+	qsort(trainid_array, trainid_array_size, sizeof(TrainIDWithDriveDateT), comp_ascending_order);
 	// 列車IDが重複する要素は取り除く
 	unique_trainid_array = (TrainIDWithDriveDateT*)malloc(sizeof(TrainIDWithDriveDateT)*trainid_array_size);
 	unique_trainid_index = 0;
