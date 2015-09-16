@@ -4,6 +4,32 @@
 #include "ExpDispLine.h"
 #include "ExpDataCtrl.h"
 #include "ExpCtrl.h"
+#include <syslog.h>
+
+static void log_open(const char* name);
+static void log_close(void);
+static void log_write(int priority, const char* message);
+
+/************************************
+ * SYSLOG オープン
+ * **********************************/
+void log_open(const char* name) {
+    openlog(name, LOG_CONS | LOG_PID, LOG_USER);
+}
+
+/************************************
+ * SYSLOG 書き込み
+ * **********************************/
+void log_write(int priority, const char* const message) {
+    syslog(priority, "%s", message);
+}
+
+/************************************
+ * SYSLOG クローズ
+ * **********************************/
+void log_close() {
+    closelog();
+}
 
 // 列車IDとその列車の取得元のリンクの運行日を保持する構造体
 struct train_id_with_drive_date_t {
@@ -118,6 +144,7 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area, const EFIF_DBHandler efif_db_handler, const Ex_NaviHandler navi_handler) {
 	size_t unique_trainid_array_size;
 	TrainIDWithDriveDateT* unique_trainid_array = create_unique_trainid_array(navi_handler, &unique_trainid_array_size);
+	log_open("create_ef_trains_LOG");
 
 	for(int unique_trainid_index = 0; unique_trainid_index < unique_trainid_array_size; ++unique_trainid_index) {
 		EFIF_InputTrainDataHandler efif_train_data = NULL;
@@ -126,7 +153,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		ExpDate date = unique_trainid_array[unique_trainid_index].drive_date;
 		efif_train_data = EFIF_InputTrainData_Create(trainid, date, &status);
 		if (!status) {
-			printf("EFIF_InputTrainData_Create 実行時エラー");
+			log_write(LOG_ERR, "EFIF_InputTrainData_Create 実行時エラー");
 		}
 		// 表示線区パターンを登録するオブジェクト
 		EFIF_DisplaySenkuPatternHandler efif_disp_senku_ptn = EFIF_DisplaySenkuPattern_Create();
@@ -149,7 +176,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			int ekispert_fare_senku_count;
 			// 表示線区IDと方向性を取得
 			if (!ExpDLinePatternList_GetLineID(d_line_ptn, d_line_no, &d_line_id, &dir)) {
-				printf("ExpDLinePatternList_GetLineID 実行時エラー");
+				log_write(LOG_ERR, "ExpDLinePatternList_GetLineID 実行時エラー");
 			}
 			// 現E表示線区から駅リストを取得、このリストは現E運賃線区の駅並びと一致する（関数コメントより）
 			dl_primitive_station_list = ExpDLine_GetDLPrimitiveStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
@@ -162,10 +189,10 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
 			efif_d_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
 			if (!status) {
-				printf("EFIF_DisplaySenku_Create 実行時エラー");
+				log_write(LOG_ERR, "EFIF_DisplaySenku_Create 実行時エラー");
 			}
 			if (ekispert_fare_senku_count != EFIF_DisplaySenku_Get_Train_Data_Entry_Count(efif_d_display_senku_handler)) {
-				printf(" EFIF_DisplaySenku が認識するの現E運賃線区の数が不正");
+				log_write(LOG_ERR, "EFIF_DisplaySenku が認識するの現E運賃線区の数が不正");
 			}
 			// 現E運賃線区単位で列車情報を登録する
 			for (int ekispert_fare_senku_no=0; ekispert_fare_senku_no<ekispert_fare_senku_count; ++ekispert_fare_senku_no) {
@@ -179,7 +206,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 				// TODO(nayamo):コンバートルールが決まってないので仮の値をセット
 				EFIF_InputTrainSectionTrainData_Set_Train_Train_Type(efif_train_section_train_data_handler, 0);
 				if (!EFIF_DisplaySenku_Set_Train_Data(efif_d_display_senku_handler, efif_train_section_train_data_handler, ekispert_fare_senku_no)) {
-					printf(" EFIF_DisplaySenku_Set_Train_Data 実行時エラー");
+					log_write(LOG_ERR, "EFIF_DisplaySenku_Set_Train_Data 実行時エラー");
 				}
 				EFIF_InputTrainSectionTrainData_Delete(efif_train_section_train_data_handler);
 			}
@@ -192,6 +219,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		// 運賃計算作業領域に列車情報入力オブジェクトを追加
 		EFIF_FareCalculationWorkingArea_Add_InputTrainData(working_area, efif_train_data);
 	}
+	log_close();
 }
 
 
