@@ -162,7 +162,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		ExpDLinePatternList d_line_ptn = ExpDLine_GetTrainLinePattern(navi_handler->dbLink, trainid);
 		int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
 		for(int d_line_no = 1; d_line_no<=d_line_count; ++d_line_no) {
-			EFIF_DisplaySenkuHandler efif_d_display_senku_handler;
+			EFIF_DisplaySenkuHandler efif_display_senku_handler;
 			int status;
 			ExpDLStationList dl_primitive_station_list;
 			ExpInt32 *primitive_sta_code_list;
@@ -187,11 +187,11 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			stop_sta_code_list = get_share_sta_code_array(dl_stop_station_list, navi_handler->dbLink, &stop_sta_code_list_size);
 			ExpDLStationList_Delete(dl_stop_station_list);
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
-			efif_d_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
+			efif_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
 			if (status != 1) {
 				log_write(LOG_ALERT, "EFIF_DisplaySenku_Create 実行時エラー");
 			}
-			if (ekispert_fare_senku_count != EFIF_DisplaySenku_Get_Train_Data_Entry_Count(efif_d_display_senku_handler)) {
+			if (ekispert_fare_senku_count != EFIF_DisplaySenku_Get_Train_Data_Entry_Count(efif_display_senku_handler)) {
 				log_write(LOG_ALERT, "EFIF_DisplaySenku が認識するの現E運賃線区の数が不正");
 			}
 			// 現E運賃線区単位で列車情報を登録する
@@ -205,13 +205,13 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 				// EFIF_InputTrainSectionTrainData_Set_Train_Train_Fare_Labels(EFIF_InputTrainSectionTrainDataHandler handler,  const EFIF_TrainFareLabelList train_fare_labels);
 				// TODO(nayamo):コンバートルールが決まってないので仮の値をセット
 				EFIF_InputTrainSectionTrainData_Set_Train_Train_Type(efif_train_section_train_data_handler, 0);
-				if (!EFIF_DisplaySenku_Set_Train_Data(efif_d_display_senku_handler, efif_train_section_train_data_handler, ekispert_fare_senku_no)) {
+				if (!EFIF_DisplaySenku_Set_Train_Data(efif_display_senku_handler, efif_train_section_train_data_handler, ekispert_fare_senku_no)) {
 					log_write(LOG_ALERT, "EFIF_DisplaySenku_Set_Train_Data 実行時エラー");
 				}
 				EFIF_InputTrainSectionTrainData_Delete(efif_train_section_train_data_handler);
 			}
 			// 表示線区オブジェクトをパターンオブジェクトに登録
-			EFIF_DisplaySenkuPattern_Add(d_line_ptn, efif_d_display_senku_handler);
+			EFIF_DisplaySenkuPattern_Add(efif_disp_senku_ptn, efif_display_senku_handler);
 			EFIF_DisplaySenku_Delete(efif_d_display_senku_handler);
 		}
 		// 表示線区パターンを列車情報入力オブジェクトに設定
