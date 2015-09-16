@@ -214,8 +214,9 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			EFIF_DisplaySenkuPattern_Add(efif_disp_senku_ptn, efif_display_senku_handler);
 			EFIF_DisplaySenku_Delete(efif_display_senku_handler);
 		}
+		ExpDLinePatternList_Delete(d_line_ptn);
 		// 表示線区パターンを列車情報入力オブジェクトに設定
-		EFIF_InputTrainData_Set_DisplaySenkuPattern(efif_train_data, d_line_ptn);
+		EFIF_InputTrainData_Set_DisplaySenkuPattern(efif_train_data, efif_disp_senku_ptn);
 		// 運賃計算作業領域に列車情報入力オブジェクトを追加
 		EFIF_FareCalculationWorkingArea_Add_InputTrainData(working_area, efif_train_data);
 	}
