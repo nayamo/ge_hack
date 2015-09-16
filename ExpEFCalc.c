@@ -212,7 +212,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			}
 			// 表示線区オブジェクトをパターンオブジェクトに登録
 			EFIF_DisplaySenkuPattern_Add(efif_disp_senku_ptn, efif_display_senku_handler);
-			EFIF_DisplaySenku_Delete(efif_d_display_senku_handler);
+			EFIF_DisplaySenku_Delete(efif_display_senku_handler);
 		}
 		// 表示線区パターンを列車情報入力オブジェクトに設定
 		EFIF_InputTrainData_Set_DisplaySenkuPattern(efif_train_data, d_line_ptn);
