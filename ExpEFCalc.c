@@ -152,7 +152,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		int trainid = unique_trainid_array[unique_trainid_index].trainid;
 		ExpDate date = unique_trainid_array[unique_trainid_index].drive_date;
 		efif_train_data = EFIF_InputTrainData_Create(trainid, date, &status);
-		if (!status) {
+		if (status != 1) {
 			log_write(LOG_ALERT, "EFIF_InputTrainData_Create 実行時エラー");
 		}
 		// 表示線区パターンを登録するオブジェクト
@@ -188,7 +188,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			ExpDLStationList_Delete(dl_stop_station_list);
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
 			efif_d_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
-			if (!status) {
+			if (status != 1) {
 				log_write(LOG_ALERT, "EFIF_DisplaySenku_Create 実行時エラー");
 			}
 			if (ekispert_fare_senku_count != EFIF_DisplaySenku_Get_Train_Data_Entry_Count(efif_d_display_senku_handler)) {
