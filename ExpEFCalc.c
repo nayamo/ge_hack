@@ -182,7 +182,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			dl_primitive_station_list = ExpDLine_GetDLPrimitiveStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
 			primitive_sta_code_list = get_share_sta_code_array(dl_primitive_station_list, navi_handler->dbLink, &primitive_sta_code_list_size);
 			ExpDLStationList_Delete(dl_primitive_station_list);
-			ekispert_fare_senku_count = primitive_sta_code_list-1;
+			ekispert_fare_senku_count = primitive_sta_code_list_size-1;
 			dl_stop_station_list = ExpDLine_GetDLStopStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
 			stop_sta_code_list = get_share_sta_code_array(dl_stop_station_list, navi_handler->dbLink, &stop_sta_code_list_size);
 			ExpDLStationList_Delete(dl_stop_station_list);
