@@ -217,8 +217,14 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		ExpDLinePatternList_Delete(d_line_ptn);
 		// 表示線区パターンを列車情報入力オブジェクトに設定
 		EFIF_InputTrainData_Set_DisplaySenkuPattern(efif_train_data, efif_disp_senku_ptn);
+		EFIF_DisplaySenkuPattern_Delete(efif_disp_senku_ptn);
 		// 運賃計算作業領域に列車情報入力オブジェクトを追加
 		EFIF_FareCalculationWorkingArea_Add_InputTrainData(working_area, efif_train_data);
+		EFIF_InputTrainData_Delete(efif_train_data);
+	}
+	//登録した情報でEFの列車を生成し作業領域に保持する
+	if (EFIF_FareCalculationWorkingArea_Create_EF_Train(working_area) != 1) {
+		log_write(LOG_ALERT, "EFIF_FareCalculationWorkingArea_Create_EF_Train 実行時エラー");
 	}
 	log_close();
 }
