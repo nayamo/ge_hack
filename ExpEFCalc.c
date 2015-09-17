@@ -200,7 +200,7 @@ log_write_int(LOG_ALERT, (int)d_line_id);
 log_write(LOG_ALERT, "d_line_dir");
 log_write_int(LOG_ALERT, (int)dir);
 log_write(LOG_ALERT, "station_list");
-for(int station_index=0; station_index<=primitive_sta_code_list_size; ++station_index) {
+for(int station_index=0; station_index<primitive_sta_code_list_size; ++station_index) {
 	ExpStationCode sta_code;
 	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, primitive_sta_code_list[station_index], &sta_code);
 	ExpChar name[256];
@@ -208,7 +208,7 @@ for(int station_index=0; station_index<=primitive_sta_code_list_size; ++station_
 	log_write(LOG_ALERT, name);
 }
 log_write(LOG_ALERT, "stop_station_list");
-for(int station_index=0; station_index<=stop_sta_code_list_size; ++station_index) {
+for(int station_index=0; station_index<stop_sta_code_list_size; ++station_index) {
 	ExpStationCode sta_code;
 	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, stop_sta_code_list[station_index], &sta_code);
 	ExpChar name[256];
