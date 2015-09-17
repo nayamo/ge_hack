@@ -48,30 +48,6 @@ struct train_id_with_drive_date_t {
 };
 typedef struct train_id_with_drive_date_t TrainIDWithDriveDateT;
 
-
-static ExpInt32 *get_share_sta_code_array(const ExpDLStationList listhd, const Ex_DataBase *exp_db, size_t *array_size) {
-	int list_count = ExpDLStationList_GetCount(listhd);
-	ExpInt32 *share_sta_code_list;
-	*array_size = 0;
-	share_sta_code_list = (ExpInt32*)malloc(sizeof(ExpInt32)*list_count);
-	if (share_sta_code_list == NULL) {
-		log_write(LOG_ALERT,"get_share_sta_code_array 内 malloc エラー");
-		abort();
-	}
-	for (int station_no = 1; station_no<=list_count; ++station_no) {
-		ExpStationCode sta_code;
-		ExpStation_SetEmptyCode(&sta_code);
-		if (!ExpDLStationList_GetStationCode(listhd, station_no, &sta_code)) {
-			log_write(LOG_ALERT,"ExpDLStationList_GetStationCode エラー");
-		}
-		ExpInt32 shared_code = ExpStation_CodeToSharedCode((ExpDataHandler)exp_db, &sta_code);
-		share_sta_code_list[station_no-1] = shared_code;
-	}
-	// ネイティブC配列なので要素数を必ず返す必要がある
-	*array_size = list_count;
-	return share_sta_code_list;
-}
-
 // 配列ソート用関数（昇順）
 static int comp_ascending_order( const void *c1, const void *c2 )
 {
@@ -88,10 +64,8 @@ static int comp_ascending_order( const void *c1, const void *c2 )
 static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler navi_handler, size_t *array_size) {
 	ExpInt16				FoundCnt=0; // 探索数
 	DSP						**dsp_table;
-	// int* unique_trainid_array;
 	TrainIDWithDriveDateT *unique_trainid_array;
 	int unique_trainid_index;
-	// int* trainid_array;
 	TrainIDWithDriveDateT *trainid_array;
 	int  trainid_array_buffer;
 	int  trainid_array_size;
@@ -105,7 +79,6 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 	*array_size = 0;
 	// 必要に応じて拡張するので適当な要素数を確保
 	trainid_array_buffer = 20;
-	// trainid_array = (int*)malloc(sizeof(int)*trainid_array_buffer);
 	trainid_array = (TrainIDWithDriveDateT*)malloc(sizeof(TrainIDWithDriveDateT)*trainid_array_buffer);
 	if (trainid_array == NULL) {
 		log_write(LOG_ALERT,"create_ef_trains 内 malloc エラー");
@@ -201,19 +174,14 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 		// 表示線区パターンを登録するオブジェクト
 		EFIF_DisplaySenkuPatternHandler efif_disp_senku_ptn = EFIF_DisplaySenkuPattern_Create();
 		ExpInt16 edit_type = 0;
-		// 列車IDから現E表示線区パターンを生成
-		// ExpDLinePatternList d_line_ptn = ExpDLine_GetTrainLinePattern(navi_handler->dbLink, trainid);
 		// 列車IDから現E表示線区毎に区切られた駅リストを生成
 		ExpDLineTrainStationList d_line_train_station_list = ExpDLine_GetTrainStationList(navi_handler->dbLink, trainid);
-		// int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
 		int d_line_count = ExpDLineTrainStationList_GetLinePatternCount(d_line_train_station_list);
 		for(int d_line_no = 1; d_line_no<=d_line_count; ++d_line_no) {
 			EFIF_DisplaySenkuHandler efif_display_senku_handler;
 			int status;
-			// ExpDLStationList dl_primitive_station_list;
 			ExpInt32 *primitive_sta_code_list;
 			size_t primitive_sta_code_list_size;
-			// ExpDLStationList dl_stop_station_list;
 			ExpInt32 *stop_sta_code_list;
 			size_t stop_sta_code_list_size;
 			int primary_dir; // その表示線区における方向性のデフォルトかな？
@@ -221,18 +189,10 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			int dir;
 			int ekispert_fare_senku_count;
 			// 表示線区IDと方向性を取得
-			// if (!ExpDLinePatternList_GetLineID(d_line_ptn, d_line_no, &d_line_id, &dir)) {
 			if (!ExpDLineTrainStationList_GetLinePatternLineID(d_line_train_station_list, d_line_no, &d_line_id, &dir)) {
 				log_write(LOG_ALERT, "ExpDLineTrainStationList_GetLinePatternLineID 実行時エラー");
 			}
-			// 現E表示線区から駅リストを取得、このリストは現E運賃線区の駅並びと一致する（関数コメントより）
-			// dl_primitive_station_list = ExpDLine_GetDLPrimitiveStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
-			// primitive_sta_code_list = get_share_sta_code_array(dl_primitive_station_list, navi_handler->dbLink, &primitive_sta_code_list_size);
-			// ExpDLStationList_Delete(dl_primitive_station_list);
-			// ekispert_fare_senku_count = primitive_sta_code_list_size-1;
-			// dl_stop_station_list = ExpDLine_GetDLStopStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
-			// stop_sta_code_list = get_share_sta_code_array(dl_stop_station_list, navi_handler->dbLink, &stop_sta_code_list_size);
-			// ExpDLStationList_Delete(dl_stop_station_list);
+			// 現E表示線区から駅リストを取得
 			get_share_sta_code_list(navi_handler->dbLink, d_line_train_station_list, d_line_no, &primitive_sta_code_list, &primitive_sta_code_list_size, &stop_sta_code_list, &stop_sta_code_list_size);
 
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
