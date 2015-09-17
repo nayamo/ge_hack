@@ -13,21 +13,31 @@ static void log_write(int priority, const char* message);
 /************************************
  * SYSLOG オープン
  * **********************************/
-void log_open(const char* name) {
+static void log_open(const char* name) {
     openlog(name, LOG_CONS | LOG_PID, LOG_USER);
+}
+
+
+/************************************
+ * SYSLOG 書き込み
+ * **********************************/
+static void log_write_int(int priority, const int num) {
+	char str[1024]; // サンプル用なのでサイズ適当
+	sprintf(str, "%d", num);
+    syslog(priority, "%s", message);
 }
 
 /************************************
  * SYSLOG 書き込み
  * **********************************/
-void log_write(int priority, const char* const message) {
+static void log_write(int priority, const char* const message) {
     syslog(priority, "%s", message);
 }
 
 /************************************
  * SYSLOG クローズ
  * **********************************/
-void log_close() {
+static void log_close() {
     closelog();
 }
 
