@@ -45,14 +45,14 @@ static ExpInt32 *get_share_sta_code_array(const ExpDLStationList listhd, const E
 	*array_size = 0;
 	share_sta_code_list = (ExpInt32*)malloc(sizeof(ExpInt32)*list_count);
 	if (share_sta_code_list == NULL) {
-		printf("get_share_sta_code_array 内 malloc エラー");
+		log_write(LOG_ALERT,"get_share_sta_code_array 内 malloc エラー");
 		abort();
 	}
 	for (int station_no = 1; station_no<=list_count; ++station_no) {
 		ExpStationCode sta_code;
 		ExpStation_SetEmptyCode(&sta_code);
 		if (!ExpDLStationList_GetStationCode(listhd, station_no, &sta_code)) {
-			printf("ExpDLStationList_GetStationCode エラー");
+			log_write(LOG_ALERT,"ExpDLStationList_GetStationCode エラー");
 		}
 		ExpInt32 shared_code = ExpStation_CodeToSharedCode((ExpDataHandler)exp_db, &sta_code);
 		share_sta_code_list[station_no-1] = shared_code;
@@ -98,7 +98,7 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 	// trainid_array = (int*)malloc(sizeof(int)*trainid_array_buffer);
 	trainid_array = (TrainIDWithDriveDateT*)malloc(sizeof(TrainIDWithDriveDateT)*trainid_array_buffer);
 	if (trainid_array == NULL) {
-		printf("create_ef_trains 内 malloc エラー");
+		log_write(LOG_ALERT,"create_ef_trains 内 malloc エラー");
 		abort();
 	}
 	// 列車の情報IDの配列を作る
@@ -112,7 +112,7 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 				trainid_array_buffer += 20;
 				trainid_array = (int*)realloc(trainid_array, sizeof(int)*trainid_array_buffer);
 				if (trainid_array == NULL) {
-					printf("create_ef_trains 内 realloc エラー");
+					log_write(LOG_ALERT,"create_ef_trains 内 realloc エラー");
 					abort();
 				}
 			}
@@ -144,7 +144,6 @@ static TrainIDWithDriveDateT* create_unique_trainid_array(const Ex_NaviHandler n
 static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area, const EFIF_DBHandler efif_db_handler, const Ex_NaviHandler navi_handler) {
 	size_t unique_trainid_array_size;
 	TrainIDWithDriveDateT* unique_trainid_array = create_unique_trainid_array(navi_handler, &unique_trainid_array_size);
-	log_open("create_ef_trains_LOG");
 
 	for(int unique_trainid_index = 0; unique_trainid_index < unique_trainid_array_size; ++unique_trainid_index) {
 		EFIF_InputTrainDataHandler efif_train_data = NULL;
@@ -226,16 +225,17 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 	if (EFIF_FareCalculationWorkingArea_Create_EF_Train(working_area) != 1) {
 		log_write(LOG_ALERT, "EFIF_FareCalculationWorkingArea_Create_EF_Train 実行時エラー");
 	}
-	log_close();
 }
 
 
 
 
 EFIF_FareCalculationWorkingAreaHandler Exp_EF_FareCalc(const EFIF_DBHandler efif_db_handler, const Ex_NaviHandler navi_handler) {
+	log_open("Exp_EF_FareCalc_LOG");
 	EFIF_FareCalculationWorkingAreaHandler working_area = EFIF_FareCalculationWorkingArea_Create(efif_db_handler);
 	// 探索経路情報からEFの列車を生成する
 	create_ef_trains(working_area, efif_db_handler, navi_handler);
+	log_close();
 	return working_area;
 }
 
