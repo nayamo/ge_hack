@@ -237,6 +237,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			if (status != 1) {
 				log_write(LOG_ALERT, "EFIF_DisplaySenku_Create 実行時エラー");
 			}
+			ekispert_fare_senku_count = primitive_sta_code_list_size-1;
 			if (ekispert_fare_senku_count != EFIF_DisplaySenku_Get_Train_Data_Entry_Count(efif_display_senku_handler)) {
 				log_write(LOG_ALERT, "EFIF_DisplaySenku が認識するの現E運賃線区の数が不正");
 			}
