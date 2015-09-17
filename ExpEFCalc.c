@@ -177,7 +177,10 @@ static void get_share_sta_code_list(const Ex_DataBase *exp_db, const ExpDLineTra
 			++stop_sta_code_list_index;
 		}
 	}
+	// modorichi set daze!!
+	*rtn_primitive_sta_code_list = primitive_sta_code_list;
 	*rtn_primitive_sta_code_list_size = primitive_sta_code_list_index;
+	*rtn_stop_sta_code_list = stop_sta_code_list;
 	*rtn_stop_sta_code_list_size = stop_sta_code_list_index;
  }
 
