@@ -22,8 +22,8 @@ static void log_open(const char* name) {
  * SYSLOG 書き込み
  * **********************************/
 static void log_write_int(int priority, const int num) {
-	char str[1024]; // サンプル用なのでサイズ適当
-	sprintf(str, "%d", num);
+	char message[1024]; // サンプル用なのでサイズ適当
+	sprintf(message, "%d", num);
     syslog(priority, "%s", message);
 }
 
