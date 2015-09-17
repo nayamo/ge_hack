@@ -230,7 +230,7 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			// dl_stop_station_list = ExpDLine_GetDLStopStationList((ExpDLineDataHandler)navi_handler->dbLink->disp_line_db_link, d_line_id, dir, &primary_dir);
 			// stop_sta_code_list = get_share_sta_code_array(dl_stop_station_list, navi_handler->dbLink, &stop_sta_code_list_size);
 			// ExpDLStationList_Delete(dl_stop_station_list);
-			get_share_sta_code_list(navi_handler->dbLink, d_line_train_station_list, &primitive_sta_code_list, &primitive_sta_code_list_size, &stop_sta_code_list, &stop_sta_code_list_size);
+			get_share_sta_code_list(navi_handler->dbLink, d_line_train_station_list, d_line_no, &primitive_sta_code_list, &primitive_sta_code_list_size, &stop_sta_code_list, &stop_sta_code_list_size);
 
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
 			efif_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
