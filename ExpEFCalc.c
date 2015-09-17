@@ -205,7 +205,7 @@ for(int station_index=0; station_index<=primitive_sta_code_list_size; ++station_
 	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, primitive_sta_code_list[station_index], &sta_code);
 	ExpChar name[256];
 	ExpStation_CodeToName( (ExpDataHandler)navi_handler->dbLink, EXP_LANG_JAPANESE, &sta_code, name, 256, 0);
-	log_write(LOG_ALERT, "name");
+	log_write(LOG_ALERT, name);
 }
 
 
