@@ -195,6 +195,20 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			// 現E表示線区から駅リストを取得
 			get_share_sta_code_list(navi_handler->dbLink, d_line_train_station_list, d_line_no, &primitive_sta_code_list, &primitive_sta_code_list_size, &stop_sta_code_list, &stop_sta_code_list_size);
 
+log_write(LOG_ALERT, "表示線区ID");
+log_write_int(LOG_ALERT, (int)d_line_id);
+log_write(LOG_ALERT, "方向性");
+log_write_int(LOG_ALERT, (int)dir);
+log_write(LOG_ALERT, "駅リスト");
+for(int station_index=0; station_index<=primitive_sta_code_list_size; ++station_index) {
+	ExpStationCode sta_code;
+	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, primitive_sta_code_list[station_index], &sta_code);
+	ExpChar name[256];
+	ExpStation_CodeToName( (ExpDataHandler)navi_handler->dbLink, EXP_LANG_JAPANESE, &sta_code, name, 256, 0);
+	log_write(LOG_ALERT, "name");
+}
+
+
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
 			efif_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
 			if (status != 1) {
