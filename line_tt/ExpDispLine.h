@@ -2,7 +2,6 @@
 #define _EXPDISPLINE_H_
 
 #include "ExpPublic.h"
-#include "ExpStruct.h"
 
 /*!
   表示線区名最大サイズ
@@ -170,6 +169,8 @@ void                ExpDLineTrainStationList_Delete(ExpDLineTrainStationList lis
 
 
 // ef用に仮追加
+struct ONLNK;
+typedef struct ONLNK  ONLNK;
 ExpDLinePatternList ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(const Ex_DBHandler dbHandler, const ONLNK *rln);
 
 #endif /* _EXPDISPLINE_H_ */
