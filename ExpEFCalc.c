@@ -274,7 +274,7 @@ void entry_search_route(EFIF_FareCalculationWorkingAreaHandler working_area, con
 		for (int rln_index=0; rln_index < dsp->rln_cnt; ++rln_index) {
 			ONLNK rln = dsp->rln[rln_index];
 			ExpDate date = ExpTool_OffsetDate(navi_dep_date, rln.offsetdate);
-			ExpDLinePatternList d_line_ptn = ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(rln);
+			ExpDLinePatternList d_line_ptn = ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(navi_handler->db_link, &rln);
 			int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
 			for (int d_line_no=1; d_line_no<d_line_count; ++d_line_no) {
 				ExpUInt32 line_id;
