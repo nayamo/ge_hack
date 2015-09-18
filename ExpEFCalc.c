@@ -262,13 +262,12 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 
 void entry_search_route(EFIF_FareCalculationWorkingAreaHandler working_area, const Ex_NaviHandler navi_handler) {
 
-	ExpInt16 foundCnt;
+	ExpInt16 foundCnt =0;
 	DSP **dsp_table;
 
-	foundCnt = GetFoundCount( navi_handler );
-	dsp_table = GetDspPtr( navi_handler );
+ 	foundCnt = GetFoundCount( navi_handler );
+ 	dsp_table = GetDspPtr( navi_handler );
 	ExpDate navi_dep_date = ExpNavi_GetDepartureDate((ExpNaviHandler)navi_handler);
-
 	if (int i=0; i<foundCnt; ++i) {
 		EFIF_InputRouteDataHandler input_route = EFIF_InputRouteDataHandler_Create();
 		DSP* dsp = dsp_table[i];
