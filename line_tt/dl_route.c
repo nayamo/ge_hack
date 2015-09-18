@@ -1630,3 +1630,185 @@ struct train_lineptn_t *ltt_make_train_lineptn_stations(ExpDiaDBHandler dia_hd, 
     return NULL;
 }
 
+// const ExpRouteResHandler routeResult, ExpInt16 routeNo, ExpInt16 railSeqNo
+ExpDLinePatternList ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(const Ex_DBHandler dbHandler, const ONLNK *rln)
+{
+    // Ex_RouteResultPtr   resPtr;
+    // Ex_DBHandler dbHandler;
+    Ex_DiaDBHandler diaHandler;
+    ExpUInt16 from_inner_sta_code, to_inner_sta_code;
+    int dep_time, arr_time;
+    ExpErr err;
+    DdbTrainData_V2 train;
+    DdbSectionPtnData_V2 sectionPtn;
+    ExpBool sec_line_alloced = EXP_FALSE;
+    struct sec_line_match_t *sec_line_match_elm = NULL;
+    int from_secptn_idx, to_secptn_idx;
+    int from_lineptn_idx, to_lineptn_idx;
+    // int index;
+    // int rln_cnt;
+    // ONLNK              *rln;
+    int cnt;
+    ExpUInt16 found_line_id;
+    ExpInt16 found_line_dir;
+    ExpUInt16 found_inner_sta_code;
+    struct Ex_DLinePatternList *dlineptn_list = NULL;
+    int i, pidx;
+
+    
+    // resPtr    = (Ex_RouteResultPtr)routeResult;
+    // dbHandler = resPtr->dbLink;
+    // diaHandler = dbHandler->dia_db_link;
+    diaHandler = dbHandler->dia_db_link;
+    
+
+    if (!diaHandler)
+        return NULL;
+
+    // if  ( routeNo < 1 || routeNo > resPtr->routeCnt )
+    //     return NULL;
+    // index     = routeNo-1;
+    // rln_cnt   = resPtr->route[index].rln_cnt;
+    
+    // if  ( railSeqNo < 1 || railSeqNo > rln_cnt )
+    //     return NULL;
+
+    // rln = &resPtr->route[index].rln[railSeqNo-1];
+    /* 対象はダイヤを持つ列車のみ */
+    if  (rln->rtype != rtype_train_dia)
+        return NULL;
+    
+    from_inner_sta_code = rln->from_eki.code; /* 発駅inner code */
+    to_inner_sta_code = rln->to_eki.code; /* 着駅inner code */
+
+    
+    // dep_time = ExpCRouteRPart_GetDepartureTime(routeResult, routeNo, railSeqNo);
+    // arr_time = ExpCRouteRPart_GetArrivalTime(routeResult, routeNo, railSeqNo);
+    // 日替わり処理未対応
+    dep_time = rln.disp_st % 1440;
+    arr_time = rln.disp_et % 1440;
+
+    // 列車情報の構造体の読み込み
+    if (!ExpDiaDB_Train_GetData_V2(diaHandler->train, rln->trainid, &train, &err)){
+        return NULL;
+    }
+
+    if (!ExpDiaDB_SectionPtn_GetData_V2(diaHandler->section_pattern, train.TrainInfo.section_ptn_code, &sectionPtn, &err)){
+        ExpDiaDB_Train_Free_V2(&train, &err);
+        return NULL;
+    }
+
+    /*
+      運賃線区パターンから表示線区パターンを求める
+     */
+    sec_line_match_elm = secptn2lineptn(diaHandler, &sectionPtn,
+                                        train.TrainInfo.from_station_code, train.TrainInfo.to_station_code,
+                                        &sec_line_alloced);
+    if (sec_line_match_elm == NULL) {
+        ExpDiaDB_Train_Free_V2(&train, &err);
+        return NULL;
+    }
+
+    /*
+      表示線区パターン上のindexを求める(区間開始駅)
+     */
+    from_secptn_idx = ltt_get_secptn_index(&train, &sectionPtn, from_inner_sta_code, dep_time, EXP_TRUE);
+    if ((cnt = count_begin_to_target_station(diaHandler, sec_line_match_elm, from_secptn_idx, from_inner_sta_code)) < 0) {
+        goto ERROR_EXIT;
+    }
+
+    if ((from_lineptn_idx = ltt_lineptn_find_line_with_station(diaHandler, sec_line_match_elm, cnt, EXP_TRUE,
+                                                               &found_line_id, &found_line_dir, &found_inner_sta_code)) < 0) {
+        goto ERROR_EXIT;
+    }
+
+    /*
+      表示線区パターン上のindexを求める(区間終了駅)
+     */
+    if ((to_secptn_idx = ltt_get_secptn_index(&train, &sectionPtn, to_inner_sta_code, arr_time, EXP_FALSE)) < 0) {
+        goto ERROR_EXIT;
+    }
+        /* printf("B from_sta=%d, to_secptn_idx=%d, to_inner_sta_code=%d, arr_time=%02d:%02d\n", from_inner_sta_code, to_secptn_idx, to_inner_sta_code, arr_time/60, arr_time%60); */
+    if ((cnt = count_begin_to_target_station(diaHandler, sec_line_match_elm, to_secptn_idx, to_inner_sta_code)) < 0) {
+        goto ERROR_EXIT;
+    }
+
+    if ((to_lineptn_idx = ltt_lineptn_find_line_with_station(diaHandler, sec_line_match_elm, cnt, EXP_FALSE,
+                                                             &found_line_id, &found_line_dir, &found_inner_sta_code)) < 0) {
+        goto ERROR_EXIT;
+    }
+
+    
+    dlineptn_list = ExpAllocPtr(sizeof(*dlineptn_list));
+    dlineptn_list->lttdb = (struct ltt_db_handle*)ExpDLine_GetDLineDataHandler(dbHandler);
+    dlineptn_list->elms_cnt = to_lineptn_idx - from_lineptn_idx + 1;
+    dlineptn_list->ptn_elms = ExpAllocPtr(sizeof(*(dlineptn_list->ptn_elms))*dlineptn_list->elms_cnt * 3);
+    /* 一つの表示線区が正規化により最大3倍になるので */
+
+    pidx = 0;
+    /* 始発駅は編集しないようにした */
+    /* dlineptn_list->ptn_elms[pidx].line_id = 0; */
+    /* dlineptn_list->ptn_elms[pidx].dir = 1; */
+    /* dlineptn_list->ptn_elms[pidx].break_sta_code = from_inner_sta_code; */
+    /* pidx++; */
+
+    {
+        ExpUInt16 before_sta_code;
+    int max_tbl_size = 10;
+    int new_tbl_size;
+    struct dline_pattern_elm *new_line_tbl;
+        
+    new_line_tbl = ExpAllocPtr(sizeof(*new_line_tbl)*max_tbl_size);
+    before_sta_code = from_inner_sta_code;
+    for (i = from_lineptn_idx; i <= to_lineptn_idx; i++) {
+        int name_idx;
+
+        dlineptn_list->ptn_elms[pidx].line_id = sec_line_match_elm->lineptn_tbl[i].line_id;
+        dlineptn_list->ptn_elms[pidx].dir = sec_line_match_elm->lineptn_tbl[i].dir;
+        if (i == to_lineptn_idx) {
+            dlineptn_list->ptn_elms[pidx].break_sta_code = to_inner_sta_code;
+        } else {
+            dlineptn_list->ptn_elms[pidx].break_sta_code = sec_line_match_elm->lineptn_tbl[i].inner_sta_code;
+        }
+
+        
+        name_idx = ltt_get_trainname_index(&train, before_sta_code, -1, EXP_TRUE);
+        
+        new_tbl_size = ltt_normalize_line_part(dlineptn_list->ptn_elms[pidx].line_id,
+                                               dlineptn_list->ptn_elms[pidx].dir,
+                                               before_sta_code,
+                                               dlineptn_list->ptn_elms[pidx].break_sta_code,
+                                               train.pTrainNameTable[name_idx].type,
+                                               new_line_tbl, max_tbl_size);
+
+        before_sta_code = dlineptn_list->ptn_elms[pidx].break_sta_code;
+        if (new_tbl_size > 0) {
+            int n;
+            /* 上の編集した分は上書きされる */
+            for (n = 0; n < new_tbl_size; n++) {
+                dlineptn_list->ptn_elms[pidx].line_id = new_line_tbl[n].line_id;
+                dlineptn_list->ptn_elms[pidx].dir = new_line_tbl[n].dir;
+                dlineptn_list->ptn_elms[pidx].break_sta_code = new_line_tbl[n].break_sta_code;
+                pidx++;
+            }
+        } else {
+            pidx++;
+        }
+    }
+    ExpFreePtr(new_line_tbl);
+    dlineptn_list->elms_cnt = pidx;
+    }
+
+ ERROR_EXIT:
+    ExpDiaDB_Train_Free_V2(&train, &err);
+
+    if (sec_line_alloced) {
+        ExpFreePtr(sec_line_match_elm->secptn_tbl);
+        ExpFreePtr(sec_line_match_elm->lineptn_tbl);
+        ExpFreePtr(sec_line_match_elm);
+    }
+        
+    
+    return dlineptn_list;
+}
+

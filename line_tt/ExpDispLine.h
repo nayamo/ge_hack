@@ -169,7 +169,8 @@ int             ExpDLineTrainStationList_GetLineStationTrainType(ExpDLStationLis
 void                ExpDLineTrainStationList_Delete(ExpDLineTrainStationList list);
 
 
-
+// ef—p‚É‰¼’Ç‰Á
+ExpDLinePatternList ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(const Ex_DBHandler dbHandler, const ONLNK *rln);
 
 #endif /* _EXPDISPLINE_H_ */
 
