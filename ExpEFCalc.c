@@ -194,27 +194,27 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 			}
 			// 現E表示線区から駅リストを取得
 			get_share_sta_code_list(navi_handler->dbLink, d_line_train_station_list, d_line_no, &primitive_sta_code_list, &primitive_sta_code_list_size, &stop_sta_code_list, &stop_sta_code_list_size);
-
-log_write(LOG_ALERT, "d_line_id");
-log_write_int(LOG_ALERT, (int)d_line_id);
-log_write(LOG_ALERT, "d_line_dir");
-log_write_int(LOG_ALERT, (int)dir);
-log_write(LOG_ALERT, "station_list");
-for(int station_index=0; station_index<primitive_sta_code_list_size; ++station_index) {
-	ExpStationCode sta_code;
-	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, primitive_sta_code_list[station_index], &sta_code);
-	ExpChar name[256];
-	ExpStation_CodeToName( (ExpDataHandler)navi_handler->dbLink, EXP_LANG_JAPANESE, &sta_code, name, 256, 0);
-	log_write(LOG_ALERT, name);
-}
-log_write(LOG_ALERT, "stop_station_list");
-for(int station_index=0; station_index<stop_sta_code_list_size; ++station_index) {
-	ExpStationCode sta_code;
-	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, stop_sta_code_list[station_index], &sta_code);
-	ExpChar name[256];
-	ExpStation_CodeToName( (ExpDataHandler)navi_handler->dbLink, EXP_LANG_JAPANESE, &sta_code, name, 256, 0);
-	log_write(LOG_ALERT, name);
-}
+// 表示線区の内容を見るコード
+// log_write(LOG_ALERT, "d_line_id");
+// log_write_int(LOG_ALERT, (int)d_line_id);
+// log_write(LOG_ALERT, "d_line_dir");
+// log_write_int(LOG_ALERT, (int)dir);
+// log_write(LOG_ALERT, "station_list");
+// for(int station_index=0; station_index<primitive_sta_code_list_size; ++station_index) {
+// 	ExpStationCode sta_code;
+// 	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, primitive_sta_code_list[station_index], &sta_code);
+// 	ExpChar name[256];
+// 	ExpStation_CodeToName( (ExpDataHandler)navi_handler->dbLink, EXP_LANG_JAPANESE, &sta_code, name, 256, 0);
+// 	log_write(LOG_ALERT, name);
+// }
+// log_write(LOG_ALERT, "stop_station_list");
+// for(int station_index=0; station_index<stop_sta_code_list_size; ++station_index) {
+// 	ExpStationCode sta_code;
+// 	ExpStation_SharedCodeToCode((ExpDataHandler)navi_handler->dbLink, stop_sta_code_list[station_index], &sta_code);
+// 	ExpChar name[256];
+// 	ExpStation_CodeToName( (ExpDataHandler)navi_handler->dbLink, EXP_LANG_JAPANESE, &sta_code, name, 256, 0);
+// 	log_write(LOG_ALERT, name);
+// }
 			// 現E表示線区の情報を設定するオブジェクトのハンドラーを生成
 			efif_display_senku_handler = EFIF_DisplaySenku_Create(efif_db_handler, d_line_id, dir, date, primitive_sta_code_list, primitive_sta_code_list_size, stop_sta_code_list, stop_sta_code_list_size, &status);
 			if (status != 1) {
@@ -260,6 +260,27 @@ for(int station_index=0; station_index<stop_sta_code_list_size; ++station_index)
 }
 
 
+void entry_search_route(EFIF_FareCalculationWorkingAreaHandler working_area, const Ex_NaviHandler navi_handler) {
+
+	ExpInt16 foundCnt = GetFoundCount( navi_handler );
+	DSP **dsp_table = GetDspPtr( navi_handler );
+
+	ExpDate navi_dep_date = ExpNavi_GetDepartureDate((ExpNaviHandler)navi_handler);
+
+	if (int i=0; i<foundCnt; ++i) {
+		EFIF_InputRouteDataHandler input_route = EFIF_InputRouteDataHandler_Create();
+
+		DSP* dsp = dsp_table[i];
+		for (int rln_index=0; rln_index < dsp->rln_cnt; ++rln_index) {
+			ONLNK rln = dsp->rln[rln_index];
+			ExpDate date = ExpTool_OffsetDate(navi_dep_date, rln.offsetdate);
+
+		}
+
+		EFIF_InputRouteDataHandler_Delete(input_route);
+
+	}
+}
 
 
 EFIF_FareCalculationWorkingAreaHandler Exp_EF_FareCalc(const EFIF_DBHandler efif_db_handler, const Ex_NaviHandler navi_handler) {
@@ -267,6 +288,13 @@ EFIF_FareCalculationWorkingAreaHandler Exp_EF_FareCalc(const EFIF_DBHandler efif
 	EFIF_FareCalculationWorkingAreaHandler working_area = EFIF_FareCalculationWorkingArea_Create(efif_db_handler);
 	// 探索経路情報からEFの列車を生成する
 	create_ef_trains(working_area, efif_db_handler, navi_handler);
+
+	// 運賃計算条件を設定する
+	// set_fare_calc_condition(working_area, navi_handler);
+
+	// 探索経路を登録する
+	entry_search_route(working_area, navi_handler);
+
 	log_close();
 	return working_area;
 }
