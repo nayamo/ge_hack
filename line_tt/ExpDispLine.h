@@ -171,6 +171,8 @@ void                ExpDLineTrainStationList_Delete(ExpDLineTrainStationList lis
 // ef—p‚É‰¼’Ç‰Á
 struct ONLNK;
 typedef struct ONLNK  ONLNK;
+struct Ex_DataBase;
+typedef struct Ex_DataBase  Ex_DataBase, *Ex_DBHandler;
 ExpDLinePatternList ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(const Ex_DBHandler dbHandler, const ONLNK *rln);
 
 #endif /* _EXPDISPLINE_H_ */
