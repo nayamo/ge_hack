@@ -1685,8 +1685,8 @@ ExpDLinePatternList ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(const Ex_
     // dep_time = ExpCRouteRPart_GetDepartureTime(routeResult, routeNo, railSeqNo);
     // arr_time = ExpCRouteRPart_GetArrivalTime(routeResult, routeNo, railSeqNo);
     // “ú‘Ö‚í‚èˆ—–¢‘Î‰
-    dep_time = rln.disp_st % 1440;
-    arr_time = rln.disp_et % 1440;
+    dep_time = rln->disp_st % 1440;
+    arr_time = rln->disp_et % 1440;
 
     // —ñÔî•ñ‚Ì\‘¢‘Ì‚Ì“Ç‚İ‚İ
     if (!ExpDiaDB_Train_GetData_V2(diaHandler->train, rln->trainid, &train, &err)){
