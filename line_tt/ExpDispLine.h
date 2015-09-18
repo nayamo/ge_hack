@@ -2,7 +2,7 @@
 #define _EXPDISPLINE_H_
 
 #include "ExpPublic.h"
-
+#include "ExpPrivate.h"
 
 /*!
   表示線区名最大サイズ
