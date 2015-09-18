@@ -274,11 +274,18 @@ void entry_search_route(EFIF_FareCalculationWorkingAreaHandler working_area, con
 		for (int rln_index=0; rln_index < dsp->rln_cnt; ++rln_index) {
 			ONLNK rln = dsp->rln[rln_index];
 			ExpDate date = ExpTool_OffsetDate(navi_dep_date, rln.offsetdate);
-
+			ExpDLinePatternList d_line_ptn = ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(rln);
+			int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
+			for (int d_line_no=1; d_line_no<d_line_count; ++d_line_no) {
+				ExpUInt32 line_id;
+				int dir;
+				if (ExpDLinePatternList_GetLineID(d_line_ptn, d_line_no, &line_id, &dir) == EXP_FALSE) {
+					log_write(LOG_ALERT, "ExpDLinePatternList_GetLineID 実行時エラー");
+				}
+				log_write_int(LOG_ALERT, (int)line_id);
+			}
 		}
-
 		EFIF_InputRouteDataHandler_Delete(input_route);
-
 	}
 }
 
@@ -287,7 +294,7 @@ EFIF_FareCalculationWorkingAreaHandler Exp_EF_FareCalc(const EFIF_DBHandler efif
 	log_open("Exp_EF_FareCalc_LOG");
 	EFIF_FareCalculationWorkingAreaHandler working_area = EFIF_FareCalculationWorkingArea_Create(efif_db_handler);
 	// 探索経路情報からEFの列車を生成する
-	create_ef_trains(working_area, efif_db_handler, navi_handler);
+	// create_ef_trains(working_area, efif_db_handler, navi_handler);
 
 	// 運賃計算条件を設定する
 	// set_fare_calc_condition(working_area, navi_handler);
