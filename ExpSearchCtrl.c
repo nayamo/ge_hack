@@ -351,8 +351,8 @@ ExpRouteResHandler ExpRoute_Search( ExpNaviHandler handler )
 	if  ( status )
 	{
 		status = EditRoute( navi_handler );
-		if  ( status == EXP_TRUE )
 Exp_EF_Debug_Trace(navi_handler);
+		if  ( status == EXP_TRUE )
 			status = CalcuFare( navi_handler );
 	}
 
