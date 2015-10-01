@@ -318,7 +318,7 @@ void Exp_EF_Debug_Trace(const Ex_NaviHandler navi_handler) {
 	log_write(LOG_ALERT, "section_count");
 	log_write_int(LOG_ALERT, (int)section_count);
 	log_write(LOG_ALERT, "rln_cnt");
-	log_write_int(LOG_ALERT, (int)dsp->rln_cnt;
+	log_write_int(LOG_ALERT, (int)dsp->rln_cnt);
 	log_close();
 }
 
