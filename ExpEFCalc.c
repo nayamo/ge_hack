@@ -259,38 +259,38 @@ static void create_ef_trains(EFIF_FareCalculationWorkingAreaHandler working_area
 	}
 }
 
-void entry_search_route(EFIF_FareCalculationWorkingAreaHandler working_area, const Ex_NaviHandler navi_handler) {
+// void entry_search_route(EFIF_FareCalculationWorkingAreaHandler working_area, const Ex_NaviHandler navi_handler) {
 
-	ExpInt16 foundCnt =0;
-	DSP **dsp_table;
+// 	ExpInt16 foundCnt =0;
+// 	DSP **dsp_table;
 
- 	foundCnt = GetFoundCount( navi_handler );
- 	dsp_table = GetDspPtr( navi_handler );
-	ExpDate navi_dep_date = ExpNavi_GetDepartureDate((ExpNaviHandler)navi_handler);
-	for (int i=0; i<foundCnt; ++i) {
-		EFIF_InputRouteDataHandler input_route = EFIF_InputRouteDataHandler_Create();
-		DSP* dsp = dsp_table[i];
-		for (int rln_index=0; rln_index < dsp->rln_cnt; ++rln_index) {
-			ONLNK rln = dsp->rln[rln_index];
-			ExpDate date = ExpTool_OffsetDate(navi_dep_date, rln.offsetdate);
-			ExpDLinePatternList d_line_ptn = NULL;
-			d_line_ptn = ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(navi_handler->dbLink, &rln);
-			if (!d_line_ptn) {
-				log_write(LOG_ALERT, "ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk 実行時エラー");
-			}
-			int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
-			for (int d_line_no=1; d_line_no<d_line_count; ++d_line_no) {
-				ExpUInt32 line_id;
-				int dir;
-				if (ExpDLinePatternList_GetLineID(d_line_ptn, d_line_no, &line_id, &dir) == EXP_FALSE) {
-					log_write(LOG_ALERT, "ExpDLinePatternList_GetLineID 実行時エラー");
-				}
-				log_write_int(LOG_ALERT, (int)line_id);
-			}
-		}
-		EFIF_InputRouteDataHandler_Delete(input_route);
-	}
-}
+//  	foundCnt = GetFoundCount( navi_handler );
+//  	dsp_table = GetDspPtr( navi_handler );
+// 	ExpDate navi_dep_date = ExpNavi_GetDepartureDate((ExpNaviHandler)navi_handler);
+// 	for (int i=0; i<foundCnt; ++i) {
+// 		EFIF_InputRouteDataHandler input_route = EFIF_InputRouteDataHandler_Create();
+// 		DSP* dsp = dsp_table[i];
+// 		for (int rln_index=0; rln_index < dsp->rln_cnt; ++rln_index) {
+// 			ONLNK rln = dsp->rln[rln_index];
+// 			ExpDate date = ExpTool_OffsetDate(navi_dep_date, rln.offsetdate);
+// 			ExpDLinePatternList d_line_ptn = NULL;
+// 			d_line_ptn = ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk(navi_handler->dbLink, &rln);
+// 			if (!d_line_ptn) {
+// 				log_write(LOG_ALERT, "ExpDLineCRouteRPart_GetTrainLinePattern_from_onlnk 実行時エラー");
+// 			}
+// 			int d_line_count = ExpDLinePatternList_GetCount(d_line_ptn);
+// 			for (int d_line_no=1; d_line_no<=d_line_count; ++d_line_no) {
+// 				ExpUInt32 line_id;
+// 				int dir;
+// 				if (ExpDLinePatternList_GetLineID(d_line_ptn, d_line_no, &line_id, &dir) == EXP_FALSE) {
+// 					log_write(LOG_ALERT, "ExpDLinePatternList_GetLineID 実行時エラー");
+// 				}
+// 				log_write_int(LOG_ALERT, (int)line_id);
+// 			}
+// 		}
+// 		EFIF_InputRouteDataHandler_Delete(input_route);
+// 	}
+// }
 
 
 EFIF_FareCalculationWorkingAreaHandler Exp_EF_FareCalc(const EFIF_DBHandler efif_db_handler, const Ex_NaviHandler navi_handler) {
@@ -303,10 +303,23 @@ EFIF_FareCalculationWorkingAreaHandler Exp_EF_FareCalc(const EFIF_DBHandler efif
 	// set_fare_calc_condition(working_area, navi_handler);
 
 	// 探索経路を登録する
-	entry_search_route(working_area, navi_handler);
+	// entry_search_route(working_area, navi_handler);
 
 	log_close();
 	return working_area;
+}
+
+
+void Exp_EF_Debug_Trace(const Ex_NaviHandler navi_handler) {
+	log_open("Exp_EF_Debug_Trace_LOG");
+	DSP **dsp_table = GetDspPtr( navi_handler );
+	DSP* dsp = dsp_table[0];
+	ExpInt16 section_count = dsp->source_froute->section_count;
+	log_write(LOG_ALERT, "section_count");
+	log_write_int(LOG_ALERT, (int)section_count);
+	log_write(LOG_ALERT, "rln_cnt");
+	log_write_int(LOG_ALERT, (int)dsp->rln_cnt;
+	log_close();
 }
 
 
